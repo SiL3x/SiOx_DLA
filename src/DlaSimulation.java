@@ -8,7 +8,6 @@ import java.util.List;
 
 import static utils.ArrayUtils.*;
 
-
 public class DlaSimulation {
 
     private List<Walker> walkers;
