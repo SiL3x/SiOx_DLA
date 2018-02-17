@@ -26,7 +26,7 @@ public class Walker {
     public void moveRnd(int moveLength) {
         int direction = ThreadLocalRandom.current().nextInt(0, 3 + 1);
         position.move(direction, moveLength);
-        position.setX(position.getX() % (configuration.getMeshSize() - 1));
+
         if (position.getY() > (configuration.getMeshSize() - 2)) position.setY(configuration.getMeshSize() - 2);
         if (position.getY() < 1) position.setY(1);
         if (position.getX() < 1) position.setX(1);
