@@ -6,15 +6,20 @@ import models.Walker;
 import java.util.ArrayList;
 import java.util.List;
 
+import static utils.ArrayUtils.arraySum;
+import static utils.ArrayUtils.arraySum8Neighbours;
+import static utils.ArrayUtils.setPosition;
+
 public class DlaSimulation {
 
     private List<Walker> walkers;
     private boolean run = true;
     public Configuration configuration;
-    private List<Position> sites;
+    //private List<Position> sites;
+    private int[][] mesh;
 
     public DlaSimulation() {
-        sites = new ArrayList<>();
+        //sites = new ArrayList<>();
         walkers = new ArrayList<>();
         loadConfiguration("test");
         createMesh();
@@ -24,33 +29,25 @@ public class DlaSimulation {
 
         while (run) {
             if(walkers.size() == 0) { walkers.add(new Walker(configuration)); }
-            if(sites.size() >= 500) {break;}
+            if(arraySum(mesh) >= 200) { break; }
 
             moveWalkers();
             calculateSticking();
 
             i++;
-            if(i==1000000) run = false;
+            //if(i==10000) run = false;
         }
 
-        DisplaySites displaySites = new DisplaySites(sites);
+        DisplaySites displaySites = new DisplaySites(mesh);
     }
 
     private void calculateSticking() {
         double distance = configuration.getMeshSize()*5;
         Position tempSite = new Position(0, 0);
         for (Walker w : walkers) {
-            for (Position site : sites) {
-                if (distance >= w.getPosition().distance(site)) {
-                    distance = w.getPosition().distance(site);
-                    tempSite = site;
-                }
-            }
-
-            if (distance <= configuration.getStickingDistance()) {
-                w.stickTo(tempSite);
-                sites.add(w.getPosition());
-                //System.out.println("Sticked t20o = " + w.getPosition());
+            if (arraySum8Neighbours(mesh, w.getPosition()) > 0) {
+                mesh[w.getPosition().getX()][w.getPosition().getY()] = 1;
+                //System.out.println("Sticked @ " + w.getPosition());
                 walkers.clear();
                 break;
             }
@@ -60,17 +57,18 @@ public class DlaSimulation {
     private void moveWalkers() {
         for (Walker w : walkers) {
             w.moveRnd(configuration.getMoveLength());
+            //System.out.println("w.getPosition() = " + w.getPosition());
         }
     }
 
     private void placeSeed() {
-        sites.add(configuration.getSeedPosition());
+        setPosition(mesh, configuration.getSeedPosition());
         System.out.println("seed placed at " + configuration.getSeedPosition());
     }
 
     private void createMesh() {
         System.out.println("mesh created meshSize = " + configuration.getMeshSize());
-        return;
+        mesh = new int[configuration.getMeshSize()][configuration.getMeshSize()];
     }
 
     private void loadConfiguration(String name) {
@@ -81,7 +79,7 @@ public class DlaSimulation {
                 configuration.setMeshSize(100);
                 configuration.setMeshResolution(10);
                 configuration.setSeedPosition(new Position(50, 90));
-                configuration.setWalkerStart(new Position(50, 10));
+                configuration.setWalkerStart(new Position(50, 70));
                 configuration.setStickingDistance(3);
                 configuration.setMoveLength(1);
             }

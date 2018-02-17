@@ -10,10 +10,10 @@ import java.awt.geom.Line2D;
 import java.util.List;
 
 public class DisplaySites extends JFrame {
-    private List<Position> sites;
+    private int[][] array;
 
-    public DisplaySites(List sites) {
-        this.sites = sites;
+    public DisplaySites(int[][] array) {
+        this.array = array;
         this.setSize(500, 500);
         this.setTitle("MyFrame");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -38,8 +38,10 @@ public class DisplaySites extends JFrame {
             graph2.setPaint(Color.BLACK);
 
 
-            for (Position site : sites) {
-                graph2.draw(new Ellipse2D.Double(site.getX()*5, site.getY()*5, 5, 5));
+            for (int x = 0; x < array.length; x++) {
+                for (int y = 0; y < array.length; y++) {
+                    if (array[x][y] >0) graph2.draw(new Ellipse2D.Double(x*5, y*5, 5, 5));
+                }
             }
             //graph2.draw(drawLine);
             //graph2.draw(drawArc2D);
