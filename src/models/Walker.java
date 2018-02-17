@@ -9,10 +9,18 @@ public class Walker {
 
     private Position position;
     private Configuration configuration;
+    private int spawnY;
 
     public Walker(Configuration configuration) {
         this.configuration = configuration;
         this.position = configuration.getWalkerStart();
+    }
+
+    public Walker(Configuration configuration, int front) {
+        this.configuration = configuration;
+        this.spawnY = front - configuration.getSpawnOffset();
+        this.position = configuration.getWalkerStart();
+
     }
 
     public void moveRnd(int moveLength) {

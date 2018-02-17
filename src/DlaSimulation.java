@@ -6,9 +6,8 @@ import models.Walker;
 import java.util.ArrayList;
 import java.util.List;
 
-import static utils.ArrayUtils.arraySum;
-import static utils.ArrayUtils.arraySum8Neighbours;
-import static utils.ArrayUtils.setPosition;
+import static utils.ArrayUtils.*;
+
 
 public class DlaSimulation {
 
@@ -17,6 +16,8 @@ public class DlaSimulation {
     public Configuration configuration;
     //private List<Position> sites;
     private int[][] mesh;
+    private int[][] meshSave;
+    private int front;
 
     public DlaSimulation() {
         //sites = new ArrayList<>();
@@ -28,17 +29,39 @@ public class DlaSimulation {
         int i = 0;
 
         while (run) {
-            if(walkers.size() == 0) { walkers.add(new Walker(configuration)); }
-            if(arraySum(mesh) >= 200) { break; }
+            if(walkers.size() == 0) { walkers.add(new Walker(configuration, front)); }
+            if(arraySum(mesh) >= 500) { break; }
 
             moveWalkers();
             calculateSticking();
 
+            moveGrowthFront();
+
             i++;
             //if(i==10000) run = false;
+            if (front < 5) break;
         }
 
-        DisplaySites displaySites = new DisplaySites(mesh);
+        meshSave = arrayAdd(meshSave, mesh.clone());
+
+        DisplaySites displaySites = new DisplaySites(meshSave);
+    }
+
+    private void moveGrowthFront() {
+        front = getFront(mesh, configuration.getGrowthRatio());
+        meshSave = arrayAdd(meshSave, mesh.clone());
+        mesh = eraseBelow(mesh, front+3);
+        //System.out.println("front = " + front);
+    }
+
+
+    private int[][] eraseBelow(int[][] array, int line) {
+        for (int y = line; y < array.length; y++) {
+            for (int x = 0; x < array.length; x++) {
+                array[x][y] = 0;
+            }
+        }
+        return array;
     }
 
     private void calculateSticking() {
@@ -63,12 +86,14 @@ public class DlaSimulation {
 
     private void placeSeed() {
         setPosition(mesh, configuration.getSeedPosition());
+        front = configuration.getSeedPosition().getY();
         System.out.println("seed placed at " + configuration.getSeedPosition());
     }
 
     private void createMesh() {
         System.out.println("mesh created meshSize = " + configuration.getMeshSize());
         mesh = new int[configuration.getMeshSize()][configuration.getMeshSize()];
+        meshSave = mesh.clone();
     }
 
     private void loadConfiguration(String name) {
@@ -82,6 +107,8 @@ public class DlaSimulation {
                 configuration.setWalkerStart(new Position(50, 70));
                 configuration.setStickingDistance(3);
                 configuration.setMoveLength(1);
+                configuration.setGrowthRatio(5); // Value: 0-100
+                configuration.setSpawnOffset(5);
             }
         }
     }

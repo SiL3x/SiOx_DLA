@@ -12,7 +12,7 @@ public class ArrayUtils {
                 arraySum += array[x][y];
             }
         }
-
+        //System.out.println("arraySum = " + arraySum);
         return arraySum;
     }
 
@@ -35,4 +35,38 @@ public class ArrayUtils {
         return array;
     }
 
+    public static int getFront(int[][] array, int growthRatio) {
+        int row = array.length;
+        for (int y = 0; y < array.length; y++) {
+            if (sumLine(array, y) >= array.length * growthRatio / 100) {
+                row = y;
+                break;
+            }
+        }
+        return row;
+    }
+
+    private static int sumLine(int[][] array, int y) {
+        int out = 0;
+        for (int x = 0; x < array.length; x++) {
+            out += array[x][y];
+        }
+        return out;
+    }
+
+    public static int[][] arrayAdd(int[][] array1, int[][] array2) {
+        if (array1.length != array2.length) {
+            System.out.println("Ohhhh Noooo - dimension mismatch");
+            return array1;
+        }
+
+        int[][] outArray = new int[array1.length][array1.length];
+
+        for (int x = 0; x < array1.length; x++) {
+            for (int y = 0; y < array1.length; y++) {
+                outArray[x][y] = array1[x][y] + array2[x][y];
+            }
+        }
+        return outArray;
+    }
 }

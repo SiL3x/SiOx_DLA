@@ -13,6 +13,10 @@ public class Configuration {
     private int moveLength;
     private double stickingDistance;
 
+    private int growthRatio;
+
+    private int spawnOffset;
+
     public Configuration(String configName) {
         this.configName = configName;
     }
@@ -62,5 +66,21 @@ public class Configuration {
 
     public void setMoveLength(int moveLength) {
         this.moveLength = moveLength;
+    }
+
+    public int getGrowthRatio() {
+        return growthRatio;
+    }
+
+    public void setGrowthRatio(int growthRatio) {
+        this.growthRatio = growthRatio;
+    }
+
+    public int getSpawnOffset() {
+        return spawnOffset;
+    }
+
+    public void setSpawnOffset(int spawnOffset) {
+        this.spawnOffset = spawnOffset;
     }
 }
