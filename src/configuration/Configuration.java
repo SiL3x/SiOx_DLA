@@ -16,6 +16,7 @@ public class Configuration {
     private int growthRatio;
 
     private int spawnOffset;
+    private int stickingProbability;
 
     public Configuration(String configName) {
         this.configName = configName;
@@ -82,5 +83,13 @@ public class Configuration {
 
     public void setSpawnOffset(int spawnOffset) {
         this.spawnOffset = spawnOffset;
+    }
+
+    public int getStickingProbability() {
+        return stickingProbability;
+    }
+
+    public void setStickingProbability(int stickingProbability) {
+        this.stickingProbability = stickingProbability;
     }
 }
