@@ -2,13 +2,15 @@ package configuration;
 
 import models.Position;
 
+import java.util.List;
+
 public class Configuration {
     private final String configName;
     private int meshSizeX;
     private int meshSizeY;
     private int meshResolution;
     private int meshSize;
-    private Position seedPosition;
+    private List<Position> seedPosition;
     private Position walkerStart;
     private int moveLength;
     private double stickingDistance;
@@ -37,11 +39,11 @@ public class Configuration {
     }
 
 
-    public Position getSeedPosition() {
+    public List<Position> getSeedPosition() {
         return seedPosition;
     }
 
-    public void setSeedPosition(Position seedPosition) {
+    public void setSeedPosition(List<Position> seedPosition) {
         this.seedPosition = seedPosition;
     }
 
