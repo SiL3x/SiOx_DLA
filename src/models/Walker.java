@@ -19,10 +19,14 @@ public class Walker {
     public Walker(Configuration configuration, int front) {
         this.configuration = configuration;
         this.spawnY = front - configuration.getSpawnOffset();
-        int randomX = ThreadLocalRandom.current().nextInt(1, configuration.getMeshSize());
+        int randomX = ThreadLocalRandom.current().nextInt(1, configuration.getMeshSize() - 1);
         this.position = new Position(randomX, spawnY);
         //System.out.println("position = " + position);
+    }
 
+    public void respawn() {
+        int randomX = ThreadLocalRandom.current().nextInt(1, configuration.getMeshSize() - 1);
+        this.position = new Position(randomX, spawnY);
     }
 
     public void moveRnd(int moveLength) {

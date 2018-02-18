@@ -5,6 +5,7 @@ import models.Walker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static utils.ArrayUtils.*;
 
@@ -13,13 +14,11 @@ public class DlaSimulation {
     private List<Walker> walkers;
     private boolean run = true;
     public Configuration configuration;
-    //private List<Position> sites;
     private int[][] mesh;
     private int[][] meshSave;
     private int front;
 
     public DlaSimulation() {
-        //sites = new ArrayList<>();
         walkers = new ArrayList<>();
         loadConfiguration("test");
         createMesh();
@@ -32,13 +31,13 @@ public class DlaSimulation {
             if(arraySum(mesh) >= 500) { break; }
 
             moveWalkers();
-            calculateSticking();
+            calculateStickingProbability();
 
             moveGrowthFront();
 
             i++;
             //if(i==10000) run = false;
-            if (front < 5) break;
+            if (front < 6) break;
         }
 
         meshSave = arrayAdd(meshSave, mesh.clone());
@@ -48,9 +47,10 @@ public class DlaSimulation {
 
     private void moveGrowthFront() {
         front = getFront(mesh, configuration.getGrowthRatio());
+        if (front > configuration.getSeedPosition().getY()) front = configuration.getSeedPosition().getY();
         meshSave = arrayAdd(meshSave, mesh.clone());
         mesh = eraseBelow(mesh, front+3);
-        //System.out.println("front = " + front);
+        System.out.println("front = " + front);
     }
 
 
@@ -76,9 +76,27 @@ public class DlaSimulation {
         }
     }
 
+    private void calculateStickingProbability() {
+        for (Walker w : walkers) {
+            boolean itSticks = arraySum8Neighbours(mesh, w.getPosition())*arraySum8Neighbours(mesh, w.getPosition()) >=
+                    ThreadLocalRandom.current().nextInt(1, configuration.getStickingProbability()*configuration.getStickingProbability());
+            if (itSticks) {
+                mesh[w.getPosition().getX()][w.getPosition().getY()] = 1;
+                //System.out.println("Sticked @ " + w.getPosition());
+                walkers.clear();
+                break;
+            }
+        }
+    }
+
+
     private void moveWalkers() {
         for (Walker w : walkers) {
             w.moveRnd(configuration.getMoveLength());
+            if (w.getPosition().getY() < (front - 10) || w.getPosition().getY() > front) {
+                w.respawn();
+                //System.out.println("respawned");
+            }
             //System.out.println("w.getPosition() = " + w.getPosition());
         }
     }
@@ -108,6 +126,7 @@ public class DlaSimulation {
                 configuration.setMoveLength(1);
                 configuration.setGrowthRatio(5); // Value: 0-100
                 configuration.setSpawnOffset(5);
+                configuration.setStickingProbability(7);
             }
         }
     }
