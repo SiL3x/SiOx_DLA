@@ -19,6 +19,7 @@ public class Configuration {
 
     private int spawnOffset;
     private int stickingProbability;
+    private int exposure;
 
     public Configuration(String configName) {
         this.configName = configName;
@@ -93,5 +94,13 @@ public class Configuration {
 
     public void setStickingProbability(int stickingProbability) {
         this.stickingProbability = stickingProbability;
+    }
+
+    public int getExposure() {
+        return exposure;
+    }
+
+    public void setExposure(int exposure) {
+        this.exposure = exposure;
     }
 }
