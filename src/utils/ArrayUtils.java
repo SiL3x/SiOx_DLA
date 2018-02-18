@@ -46,7 +46,7 @@ public class ArrayUtils {
         return row;
     }
 
-    private static int sumLine(int[][] array, int y) {
+    public static int sumLine(int[][] array, int y) {
         int out = 0;
         for (int x = 0; x < array.length; x++) {
             out += array[x][y];

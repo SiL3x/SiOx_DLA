@@ -3,7 +3,6 @@ import graphics.DisplaySites;
 import models.Position;
 import models.Walker;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +18,7 @@ public class DlaSimulation {
     private int[][] mesh;
     private int[][] meshSave;
     private int front;
+    private int i;
 
     public DlaSimulation() {
         walkers = new ArrayList<>();
@@ -26,18 +26,26 @@ public class DlaSimulation {
         createMesh();
         placeSeed();
 
-        int i = 0;
+        i = 0;
+        int frontTmp = front;
 
         while (run) {
             if(walkers.size() == 0) { walkers.add(new Walker(configuration, front)); }
             if(arraySum(mesh) >= 500) { break; }
 
+            i++;
+
             moveWalkers();
             calculateStickingProbability();
 
-            moveGrowthFront();
+            moveGrowthFrontByExposure();
 
-            i++;
+            if ( frontTmp != front) {
+                System.out.println("front = " + front + "\ti = " + i + "\tratio = " + (1.0*i / (frontTmp - front)));
+                frontTmp = front;
+                i = 0;
+            }
+
             //if(i==10000) run = false;
             if (front < 6) break;
         }
@@ -47,6 +55,14 @@ public class DlaSimulation {
         DisplaySites displaySites = new DisplaySites(meshSave);
     }
 
+    private void moveGrowthFrontByExposure() {
+        if (i == configuration.getExposure() ||
+                sumLine(mesh, front) >= (configuration.getGrowthRatio() * configuration.getMeshSize()) / 100.0) {
+            front--;
+            i = 0;
+        }
+    }
+
     private void moveGrowthFront() {
         front = getFront(mesh, configuration.getGrowthRatio());
         if (front > configuration.getSeedPosition().get(0).getY()) {
@@ -54,7 +70,7 @@ public class DlaSimulation {
         }
         meshSave = arrayAdd(meshSave, mesh.clone());
         mesh = eraseBelow(mesh, front+3);
-        System.out.println("front = " + front);
+        //System.out.println("front = " + front);
     }
 
 
@@ -132,7 +148,8 @@ public class DlaSimulation {
                 configuration.setMoveLength(1);
                 configuration.setGrowthRatio(10); // Value: 0-100
                 configuration.setSpawnOffset(5);
-                configuration.setStickingProbability(3);
+                configuration.setStickingProbability(5);
+                configuration.setExposure(50000);
             }
         }
     }
