@@ -3,7 +3,9 @@ import graphics.DisplaySites;
 import models.Position;
 import models.Walker;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -47,7 +49,9 @@ public class DlaSimulation {
 
     private void moveGrowthFront() {
         front = getFront(mesh, configuration.getGrowthRatio());
-        if (front > configuration.getSeedPosition().getY()) front = configuration.getSeedPosition().getY();
+        if (front > configuration.getSeedPosition().get(0).getY()) {
+            front = configuration.getSeedPosition().get(0).getY();
+        }
         meshSave = arrayAdd(meshSave, mesh.clone());
         mesh = eraseBelow(mesh, front+3);
         System.out.println("front = " + front);
@@ -102,8 +106,10 @@ public class DlaSimulation {
     }
 
     private void placeSeed() {
-        setPosition(mesh, configuration.getSeedPosition());
-        front = configuration.getSeedPosition().getY();
+        for (Position p : configuration.getSeedPosition()) {
+            setPosition(mesh, p);
+        }
+        front = configuration.getSeedPosition().get(0).getY();
         System.out.println("seed placed at " + configuration.getSeedPosition());
     }
 
@@ -120,13 +126,13 @@ public class DlaSimulation {
                 configuration = new Configuration("test");
                 configuration.setMeshSize(100);
                 configuration.setMeshResolution(10);
-                configuration.setSeedPosition(new Position(50, 90));
+                configuration.setSeedPosition(Arrays.asList(new Position(35, 90), new Position(70, 90)));
                 configuration.setWalkerStart(new Position(50, 70));
                 configuration.setStickingDistance(3);
                 configuration.setMoveLength(1);
-                configuration.setGrowthRatio(5); // Value: 0-100
+                configuration.setGrowthRatio(10); // Value: 0-100
                 configuration.setSpawnOffset(5);
-                configuration.setStickingProbability(7);
+                configuration.setStickingProbability(3);
             }
         }
     }
