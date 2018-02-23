@@ -1,6 +1,6 @@
-package utils;
+package main.utils;
 
-import models.Position;
+import main.models.Position;
 
 public class ArrayUtils {
 
@@ -68,5 +68,17 @@ public class ArrayUtils {
             }
         }
         return outArray;
+    }
+
+    public static int subArrayMultSum(final int[][] array1, final int[][] array2) {
+        int out = 0;
+
+        for (int x = 0; x < array1.length; x++) {
+            for (int y = 0; y < array1.length; y++) {
+                out += array1[x][y] * array2[x][y];
+                //System.out.println("array1 = " + array1[x][y] + " a2 = " + array2[x][y]);
+            }
+        }
+        return out;
     }
 }

@@ -1,4 +1,4 @@
-package models;
+package main.models;
 
 public class Vec {
     private double y;

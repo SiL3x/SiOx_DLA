@@ -1,12 +1,12 @@
-package models;
+package main.models;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import configuration.Configuration;
-import models.Vec.*;
+import main.configuration.Configuration;
 
 public class Walker {
 
+    private int border=1;
     private Position position;
     private Configuration configuration;
     private int spawnY;
@@ -14,18 +14,20 @@ public class Walker {
     public Walker(Configuration configuration) {
         this.configuration = configuration;
         this.position = configuration.getWalkerStart();
+        this.border = configuration.getKernel().length/2 +1;
     }
 
     public Walker(Configuration configuration, int front) {
         this.configuration = configuration;
         this.spawnY = front - configuration.getSpawnOffset();
-        int randomX = ThreadLocalRandom.current().nextInt(1, configuration.getMeshSize() - 1);
+        this.border = configuration.getKernel().length/2 +1;
+        int randomX = ThreadLocalRandom.current().nextInt(border, configuration.getMeshSize() - border);
         this.position = new Position(randomX, spawnY);
         //System.out.println("position = " + position);
     }
 
     public void respawn() {
-        int randomX = ThreadLocalRandom.current().nextInt(1, configuration.getMeshSize() - 1);
+        int randomX = ThreadLocalRandom.current().nextInt(border, configuration.getMeshSize() - border);
         this.position = new Position(randomX, spawnY);
     }
 
@@ -33,10 +35,12 @@ public class Walker {
         int direction = ThreadLocalRandom.current().nextInt(0, 3 + 1);
         position.move(direction, moveLength);
 
-        if (position.getY() > (configuration.getMeshSize() - 2)) position.setY(configuration.getMeshSize() - 2);
-        if (position.getY() < 1) position.setY(1);
-        if (position.getX() < 1) position.setX(1);
-        if (position.getX() > configuration.getMeshSize() - 2) position.setX(configuration.getMeshSize() - 2);
+        int meshSize = configuration.getMeshSize();
+
+        if (position.getY() > (meshSize - border)) position.setY(meshSize - border);
+        if (position.getY() < border) position.setY(border);
+        if (position.getX() < border) position.setX(border);
+        if (position.getX() > meshSize - border) position.setX(meshSize - border);
     }
 
     public Position getPosition() {
