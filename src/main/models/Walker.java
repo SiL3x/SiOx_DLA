@@ -1,9 +1,8 @@
-package models;
+package main.models;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import configuration.Configuration;
-import models.Vec.*;
+import main.configuration.Configuration;
 
 public class Walker {
 

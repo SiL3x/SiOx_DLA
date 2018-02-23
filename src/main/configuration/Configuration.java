@@ -1,6 +1,6 @@
-package configuration;
+package main.configuration;
 
-import models.Position;
+import main.models.Position;
 
 import java.util.List;
 

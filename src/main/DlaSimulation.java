@@ -1,14 +1,16 @@
-import configuration.Configuration;
-import graphics.DisplaySites;
-import models.Position;
-import models.Walker;
+package main;
+
+import main.configuration.Configuration;
+import main.graphics.DisplaySites;
+import main.models.Position;
+import main.models.Walker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static utils.ArrayUtils.*;
+import static main.utils.ArrayUtils.*;
 
 public class DlaSimulation {
 
@@ -27,6 +29,7 @@ public class DlaSimulation {
         placeSeed();
 
         i = 0;
+        int j = 0;
         int frontTmp = front;
 
         while (run) {
@@ -34,9 +37,11 @@ public class DlaSimulation {
             if(arraySum(mesh) >= 200) { break; }
 
             i++;
+            j++;
 
             moveWalkers();
-            calculateStickingKernel();
+            calculateStickingProbabilityKernel();
+            //calculateStickingKernel();
 
             //moveGrowthFrontByExposure();
             moveGrowthFront();
@@ -47,8 +52,8 @@ public class DlaSimulation {
                 i = 0;
             }
 
-            //if(i==10000) run = false;
-            if (front < 6) break;
+            if(j==1e6) run = false;
+            if (front < 10) break;
         }
 
         meshSave = arrayAdd(meshSave, mesh.clone());
@@ -102,7 +107,7 @@ public class DlaSimulation {
             final int[][] subArray = getSubArray(w.getPosition());
             final int sum = subArrayMultSum(subArray, configuration.getKernel());
             //System.out.println("sum = " + sum);
-            if (arraySum8Neighbours(mesh, w.getPosition()) > 0) {
+            if (sum > 0) {
                 mesh[w.getPosition().getX()][w.getPosition().getY()] = 1;
                 //System.out.println("Sticked @ " + w.getPosition());
                 walkers.clear();
@@ -111,14 +116,33 @@ public class DlaSimulation {
         }
     }
 
-    private int[][] getSubArray(final Position position) {
-        final int size = configuration.getKernel().length;
-        final int px = position.getX();
-        final int py = position.getY();
+    private void calculateStickingProbabilityKernel() {
+        for (Walker w : walkers) {
+            final int[][] subArray = getSubArray(w.getPosition());
+            final int sum = subArrayMultSum(subArray, configuration.getKernel());
+            //System.out.println("sum = " + sum);
+            //System.out.println("sum = " + sum);
+
+            boolean itSticks = sum*sum >=
+                    ThreadLocalRandom.current().nextInt(1, configuration.getStickingProbability()*configuration.getStickingProbability());
+            if (itSticks) {
+                mesh[w.getPosition().getX()][w.getPosition().getY()] = 1;
+                //System.out.println("Sticked @ " + w.getPosition());
+                walkers.clear();
+                break;
+            }
+        }
+    }
+
+    private int[][] getSubArray(Position position) {
+        int size = configuration.getKernel().length;
+        int px = position.getX();
+        int py = position.getY();
         int[][] outArray = new int[size][size];
+
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
-                outArray[x][y] += mesh[px - size/2][py - size/2];
+                outArray[x][y] += mesh[px - size/2 + x][py - size/2 + y];
             }
         }
         return outArray;
@@ -167,11 +191,27 @@ public class DlaSimulation {
         switch (name) {
             case "test" : {
                 System.out.println("this is a test");
+
+                int[][] kernel = {
+                        {0, 0, 0, 0, 0},
+                        {0, 0, 0, 1, 0},
+                        {0, 0, 0, 5, 3},
+                        {0, 0, 0, 1, 0},
+                        {0, 0, 0, 0, 0}
+                };
+                /*
                 int[][] kernel = {{0, 0, 0, 0, 0},
                                   {0, 0, 0, 0, 0},
                                   {0, 0, 0, 0, 0},
                                   {0, 1, 1, 1, 0},
                                   {1, 1, 1, 1, 1}};
+
+                int[][] kernel = {{0, 0, 0, 0, 0},
+                                  {0, 0, 0, 0, 0},
+                                  {0, 0, 0, 0, 0},
+                                  {0, 1, 5, 1, 0},
+                                  {0, 0, 1, 0, 0}};
+                 */
                 configuration = new Configuration("test");
                 configuration.setMeshSize(100);
                 configuration.setMeshResolution(10);
@@ -181,8 +221,8 @@ public class DlaSimulation {
                 configuration.setMoveLength(1);
                 configuration.setGrowthRatio(10); // Value: 0-100
                 configuration.setSpawnOffset(5);
-                configuration.setStickingProbability(6);
-                configuration.setExposure(50000);
+                configuration.setStickingProbability(9);
+                configuration.setExposure(2000);
                 configuration.setKernel(kernel);
                 break;
             }
