@@ -20,6 +20,7 @@ public class Configuration {
     private int spawnOffset;
     private int stickingProbability;
     private int exposure;
+    private int[][] kernel;
 
     public Configuration(String configName) {
         this.configName = configName;
@@ -102,5 +103,13 @@ public class Configuration {
 
     public void setExposure(int exposure) {
         this.exposure = exposure;
+    }
+
+    public void setKernel(int[][] kernel) {
+        this.kernel = kernel;
+    }
+
+    public int[][] getKernel() {
+        return kernel;
     }
 }

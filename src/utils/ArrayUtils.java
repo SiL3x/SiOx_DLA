@@ -69,4 +69,15 @@ public class ArrayUtils {
         }
         return outArray;
     }
+
+    public static int subArrayMultSum(final int[][] array1, final int[][] array2) {
+        int out = 0;
+
+        for (int x = 0; x < array1.length; x++) {
+            for (int y = 0; y < array1.length; y++) {
+                out += array1[x][y] * array2[x][y];
+            }
+        }
+        return out;
+    }
 }
