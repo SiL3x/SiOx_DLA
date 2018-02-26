@@ -32,7 +32,7 @@ public class DlaSimulation {
         createMesh();
         substrate = new Substrate(configuration.getMeshSize());
         substrate.createSubstrateFromPoints(configuration.substratePoints);
-        placeSeed();
+        placeSeed(configuration.getSeedNumber());
 
         i = 0;
         int j = 0;
@@ -52,13 +52,24 @@ public class DlaSimulation {
             moveGrowthFront();
 
             if(j==1e6) run = false;
-            if (front > 70) break;
+            if (front >= 40) break;
         }
 
         meshSave = arrayAdd(meshSave, mesh.clone());
         meshSave = arrayAdd(meshSave, substrate.getMeshWithSubstrate());
 
         DisplaySites displaySites = new DisplaySites(meshSave);
+    }
+
+    private void placeSeed(int seedNumber) {
+        int border = configuration.getKernel().length/2 +1;
+
+        for (int k = 0; k < seedNumber; k++) {
+            int x = ThreadLocalRandom.current().nextInt(border, configuration.getMeshSize() - border);
+            mesh[x][substrate.getValue(x) - 1] = 1;
+            System.out.println("Seed placed @ (" + x + ", " + (substrate.getValue(x) - 1) + ")");
+        }
+
     }
 
     private void moveGrowthFrontByExposure() {
@@ -148,21 +159,22 @@ public class DlaSimulation {
                 configuration = new Configuration("test");
                 configuration.setMeshSize(100);
                 configuration.setMeshResolution(10);
-                configuration.setSeedPosition(Arrays.asList(new Position(35, 90), new Position(70, 90)));
+                //configuration.setSeedPosition(Arrays.asList(new Position(35, 90), new Position(70, 90)));
+                configuration.setSeedNumber(6);
                 configuration.setWalkerStart(new Position(50, 70));
                 configuration.setStickingDistance(3);
                 configuration.setMoveLength(1);
-                configuration.setGrowthRatio(10); // Value: 0-100
+                configuration.setGrowthRatio(30); // Value: 0-100
                 configuration.setSpawnOffset(5);
                 configuration.setStickingProbability(5);
                 configuration.setExposure(2000);
                 configuration.setKernel(kernel);
-                //configuration.substratePoints.add(new Position(0, 70));
-                //configuration.substratePoints.add(new Position(50, 100));
-                //configuration.substratePoints.add(new Position(100, 70));
+                configuration.substratePoints.add(new Position(0, 50));
+                configuration.substratePoints.add(new Position(50, 99));
+                configuration.substratePoints.add(new Position(100, 50));
 
-                configuration.substratePoints.add(new Position(0, 90));
-                configuration.substratePoints.add(new Position(100, 90));
+                //configuration.substratePoints.add(new Position(0, 90));
+                //configuration.substratePoints.add(new Position(100, 90));
 
                 //configuration.substratePoints.add(new Position(0, 90));
                 //configuration.substratePoints.add(new Position(100, 90));
