@@ -32,7 +32,6 @@ public class DlaSimulation {
         createMesh();
         substrate = new Substrate(configuration.getMeshSize());
         substrate.createSubstrateFromPoints(configuration.substratePoints);
-        substrate.setFront(90);
         placeSeed();
 
         i = 0;
@@ -41,7 +40,6 @@ public class DlaSimulation {
 
         while (run) {
             if(walkers.size() == 0) {
-                //System.out.println("front = " + front);
                 walkers.add(new Walker(configuration, front));
             }
             if(arraySum(mesh) >= 10000) { break; }
@@ -51,22 +49,11 @@ public class DlaSimulation {
 
             moveWalkers();
             calculateStickingProbabilityKernel();
-            //calculateStickingKernel();
-
-            //moveGrowthFrontByExposure();
             moveGrowthFront();
 
-            /*
-            if ( frontTmp != front) {
-                System.out.println("front = " + front + "\ti = " + i + "\tratio = " + (1.0*i / (frontTmp - front)));
-                //frontTmp = front;
-                i = 0;
-            }
-            */
-
             if(j==1e6) run = false;
-            if (front <= 12) break;
-            if (substrate.getHighestPoint() < 15) break;
+            if (front > 70) break;
+            //if (substrate.getHighestPoint() < 15) break;
         }
 
         meshSave = arrayAdd(meshSave, mesh.clone());
@@ -84,56 +71,13 @@ public class DlaSimulation {
 
     private void moveGrowthFront() {
         frontTmp = substrate.getFront(mesh, configuration.getGrowthRatio());
-        //System.out.println("frontTmp = " + frontTmp);
 
         if (frontTmp != front) {
-            //substrate.moveFrontBy(front - frontTmp);
-            //System.out.println("substrate = " + substrate);
-            System.out.println("front = " + front + "  frontTmp = " + frontTmp);
             front = frontTmp;
-        }
-
-
-        //System.out.println("front = " + front);
-        //meshSave = arrayAdd(meshSave, mesh.clone());
-        //mesh = eraseBelow(mesh, front+3);
-    }
-
-
-
-    private int[][] eraseBelow(int[][] array, int line) {
-        for (int y = line; y < array.length; y++) {
-            for (int x = 0; x < array.length; x++) {
-                array[x][y] = 0;
-            }
-        }
-        return array;
-    }
-
-    private void calculateSticking() {
-        double distance = configuration.getMeshSize()*5;
-        Position tempSite = new Position(0, 0);
-        for (Walker w : walkers) {
-            if (arraySum8Neighbours(mesh, w.getPosition()) > 0) {
-                mesh[w.getPosition().getX()][w.getPosition().getY()] = 1;
-                walkers.clear();
-                break;
-            }
+            System.out.println("front = " + front);
         }
     }
 
-    private void calculateStickingKernel() {
-        for (Walker w : walkers) {
-            final int[][] subArray = getSubArray(w.getPosition());
-            final int sum = subArrayMultSum(subArray, configuration.getKernel());
-
-            if (sum > 0) {
-                mesh[w.getPosition().getX()][w.getPosition().getY()] = 1;
-                walkers.clear();
-                break;
-            }
-        }
-    }
 
     private void calculateStickingProbabilityKernel() {
         for (Walker w : walkers) {
@@ -164,28 +108,13 @@ public class DlaSimulation {
         return outArray;
     }
 
-    private void calculateStickingProbability() {
-        for (Walker w : walkers) {
-            boolean itSticks = arraySum8Neighbours(mesh, w.getPosition())*arraySum8Neighbours(mesh, w.getPosition()) >=
-                    ThreadLocalRandom.current().nextInt(1, configuration.getStickingProbability()*configuration.getStickingProbability());
-            if (itSticks) {
-                mesh[w.getPosition().getX()][w.getPosition().getY()] = 1;
-                System.out.println("Sticked @ " + w.getPosition());
-                walkers.clear();
-                break;
-            }
-        }
-    }
-
     private void moveWalkers() {
         for (Walker w : walkers) {
             w.moveRnd(configuration.getMoveLength());
             if (w.getPosition().getY() < (substrate.getValue(w.getPosition().getX()) - 10) ||
                     w.getPosition().getY() >= substrate.getValue(w.getPosition().getX())) {
                 w.respawn(substrate);
-                //System.out.println("respawned - position = " + w.getPosition());
             }
-            //System.out.println("w.getPosition() = " + w.getPosition());
         }
     }
 
@@ -223,9 +152,9 @@ public class DlaSimulation {
                 configuration.setWalkerStart(new Position(50, 70));
                 configuration.setStickingDistance(3);
                 configuration.setMoveLength(1);
-                configuration.setGrowthRatio(1); // Value: 0-100
+                configuration.setGrowthRatio(10); // Value: 0-100
                 configuration.setSpawnOffset(5);
-                configuration.setStickingProbability(3);
+                configuration.setStickingProbability(5);
                 configuration.setExposure(2000);
                 configuration.setKernel(kernel);
                 //configuration.substratePoints.add(new Position(0, 70));
