@@ -3,6 +3,7 @@ package main.graphics;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 
 public class DisplaySites extends JFrame {
     private int[][] array;
@@ -14,7 +15,6 @@ public class DisplaySites extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.add(new DisplaySites.DrawStuff(), BorderLayout.CENTER);
         this.setVisible(true);
-
     }
 
     private class DrawStuff extends JComponent {
@@ -25,14 +25,25 @@ public class DisplaySites extends JFrame {
             graph2.setBackground(Color.BLACK);
 
             graph2.setPaint(Color.BLACK);
+            Rectangle2D.Double background = new Rectangle2D.Double(0, 0, 500, 500);
+            graph2.fill(background);
+            graph2.draw(background);
 
-            System.out.println("drawing array.length = " + array.length);
+            Ellipse2D.Double circle1 = new Ellipse2D.Double(0, 0, 5, 5);
+            graph2.draw(circle1);
+
+            graph2.setPaint(Color.GRAY);
 
             for (int x = 0; x < array.length; x++) {
                 for (int y = 0; y < array.length; y++) {
-                    if (array[x][y] >0) graph2.draw(new Ellipse2D.Double(x*5, y*5, 5, 5));
+                    if (array[x][y] >0) {
+                        Ellipse2D.Double circle = new Ellipse2D.Double(x*5, y*5, 5, 5);
+                        graph2.fill(circle);
+                        graph2.draw(circle);
+                    }
                 }
             }
+
         }
 
         private Shape cirle(int i) {

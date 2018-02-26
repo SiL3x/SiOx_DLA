@@ -102,7 +102,6 @@ public class Substrate {
         int[][] outMesh = new int[meshSize][meshSize];
 
         for (int x = 0; x < meshSize; x++) {
-            System.out.println("x = " + x + " values[x] = " + values[x]);
             outMesh[x][values[x]] = 1;
         }
 
