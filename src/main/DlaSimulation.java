@@ -28,7 +28,7 @@ public class DlaSimulation {
 
     public DlaSimulation() {
         walkers = new ArrayList<>();
-        loadConfiguration("test");
+        loadConfiguration("layer_1");
         createMesh();
         substrate = new Substrate(configuration.getMeshSize());
         substrate.createSubstrateFromPoints(configuration.substratePoints);
@@ -178,6 +178,39 @@ public class DlaSimulation {
 
                 //configuration.substratePoints.add(new Position(0, 90));
                 //configuration.substratePoints.add(new Position(100, 90));
+
+                break;
+            }
+
+            case "layer_1" : {
+                System.out.println("simulate one layer of SiOx on AZO");
+
+                int[][] kernel = {
+                        {0, 0, 0, 0, 0},
+                        {0, 0, 0, 1, 0},
+                        {0, 0, 0, 2, 1},
+                        {0, 0, 0, 1, 0},
+                        {0, 0, 0, 0, 0}
+                };
+
+                configuration = new Configuration("first real try");
+                configuration.setMeshSize(100);
+                configuration.setMeshResolution(10);
+                configuration.setSeedNumber(20);
+                configuration.setWalkerStart(new Position(50, 70));
+                configuration.setStickingDistance(3);
+                configuration.setMoveLength(1);
+                configuration.setGrowthRatio(40); // Value: 0-100
+                configuration.setSpawnOffset(5);
+                configuration.setStickingProbability(4);
+                configuration.setExposure(2000);
+                configuration.setKernel(kernel);
+                configuration.substratePoints.add(new Position(0, 80));
+                configuration.substratePoints.add(new Position(20, 90));
+                configuration.substratePoints.add(new Position(45, 82));
+                configuration.substratePoints.add(new Position(65, 92));
+                configuration.substratePoints.add(new Position(83, 85));
+                configuration.substratePoints.add(new Position(100, 89));
 
                 break;
             }
