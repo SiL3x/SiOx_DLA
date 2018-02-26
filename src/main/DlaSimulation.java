@@ -53,10 +53,10 @@ public class DlaSimulation {
 
             if(j==1e6) run = false;
             if (front > 70) break;
-            //if (substrate.getHighestPoint() < 15) break;
         }
 
         meshSave = arrayAdd(meshSave, mesh.clone());
+        meshSave = arrayAdd(meshSave, substrate.getMeshWithSubstrate());
 
         DisplaySites displaySites = new DisplaySites(meshSave);
     }

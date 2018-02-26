@@ -98,36 +98,13 @@ public class Substrate {
         return Arrays.toString(values);
     }
 
-    public static void main(String[] args) {
-        int[][] mesh = {
-                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
-                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
-                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
-                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
-                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
-                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
-                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
-                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
-                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
-        };
+    public int[][] getMeshWithSubstrate() {
+        int[][] outMesh = new int[meshSize][meshSize];
 
-        System.out.println("mesh.length = " + mesh.length);
+        for (int x = 0; x < meshSize; x++) {
+            outMesh[x][values[x]] = 1;
+        }
 
-        Substrate substrate = new Substrate(10);
-        List<Position> positions = new ArrayList<>();
-        positions.add(new Position(0, 10));
-        //positions.add(new Position(10, 15));
-        positions.add(new Position(10, 10));
-        substrate.setHighestPoint();
-
-        substrate.createSubstrateFromPoints(positions);
-        System.out.println(substrate);
-        substrate.getFront(mesh, 15);
-        //substrate.moveFrontBy(2);
-        System.out.println(substrate);
-        substrate.getFront(mesh, 15);
-        System.out.println(substrate);
+        return outMesh;
     }
 }
