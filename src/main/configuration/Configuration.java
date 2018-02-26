@@ -23,6 +23,7 @@ public class Configuration {
     private int exposure;
     private int[][] kernel;
     public List<Position> substratePoints;
+    private int seedNumber;
 
     public Configuration(String configName) {
         this.configName = configName;
@@ -114,5 +115,13 @@ public class Configuration {
 
     public int[][] getKernel() {
         return kernel;
+    }
+
+    public void setSeedNumber(int seedNumber) {
+        this.seedNumber = seedNumber;
+    }
+
+    public int getSeedNumber() {
+        return seedNumber;
     }
 }
