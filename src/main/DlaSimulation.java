@@ -3,6 +3,7 @@ package main;
 import main.configuration.Configuration;
 import main.graphics.DisplaySites;
 import main.models.Position;
+import main.models.Substrate;
 import main.models.Walker;
 
 import java.util.ArrayList;
@@ -14,49 +15,48 @@ import static main.utils.ArrayUtils.*;
 
 public class DlaSimulation {
 
+    private int frontTmp;
     private List<Walker> walkers;
     private boolean run = true;
     public Configuration configuration;
+
     private int[][] mesh;
     private int[][] meshSave;
     private int front;
     private int i;
+    private Substrate substrate;
 
     public DlaSimulation() {
         walkers = new ArrayList<>();
         loadConfiguration("test");
         createMesh();
+        substrate = new Substrate(configuration.getMeshSize());
+        substrate.createSubstrateFromPoints(configuration.substratePoints);
         placeSeed();
 
         i = 0;
         int j = 0;
-        int frontTmp = front;
+        frontTmp = front;
 
         while (run) {
-            if(walkers.size() == 0) { walkers.add(new Walker(configuration, front)); }
-            if(arraySum(mesh) >= 200) { break; }
+            if(walkers.size() == 0) {
+                walkers.add(new Walker(configuration, front));
+            }
+            if(arraySum(mesh) >= 10000) { break; }
 
             i++;
             j++;
 
             moveWalkers();
             calculateStickingProbabilityKernel();
-            //calculateStickingKernel();
-
-            //moveGrowthFrontByExposure();
             moveGrowthFront();
 
-            if ( frontTmp != front) {
-                System.out.println("front = " + front + "\ti = " + i + "\tratio = " + (1.0*i / (frontTmp - front)));
-                frontTmp = front;
-                i = 0;
-            }
-
             if(j==1e6) run = false;
-            if (front < 10) break;
+            if (front > 70) break;
         }
 
         meshSave = arrayAdd(meshSave, mesh.clone());
+        meshSave = arrayAdd(meshSave, substrate.getMeshWithSubstrate());
 
         DisplaySites displaySites = new DisplaySites(meshSave);
     }
@@ -70,64 +70,24 @@ public class DlaSimulation {
     }
 
     private void moveGrowthFront() {
-        front = getFront(mesh, configuration.getGrowthRatio());
-        if (front > configuration.getSeedPosition().get(0).getY()) {
-            front = configuration.getSeedPosition().get(0).getY();
-        }
-        meshSave = arrayAdd(meshSave, mesh.clone());
-        mesh = eraseBelow(mesh, front+3);
-        //System.out.println("front = " + front);
-    }
+        frontTmp = substrate.getFront(mesh, configuration.getGrowthRatio());
 
-
-    private int[][] eraseBelow(int[][] array, int line) {
-        for (int y = line; y < array.length; y++) {
-            for (int x = 0; x < array.length; x++) {
-                array[x][y] = 0;
-            }
-        }
-        return array;
-    }
-
-    private void calculateSticking() {
-        double distance = configuration.getMeshSize()*5;
-        Position tempSite = new Position(0, 0);
-        for (Walker w : walkers) {
-            if (arraySum8Neighbours(mesh, w.getPosition()) > 0) {
-                mesh[w.getPosition().getX()][w.getPosition().getY()] = 1;
-                //System.out.println("Sticked @ " + w.getPosition());
-                walkers.clear();
-                break;
-            }
+        if (frontTmp != front) {
+            front = frontTmp;
+            System.out.println("front = " + front);
         }
     }
 
-    private void calculateStickingKernel() {
-        for (Walker w : walkers) {
-            final int[][] subArray = getSubArray(w.getPosition());
-            final int sum = subArrayMultSum(subArray, configuration.getKernel());
-            //System.out.println("sum = " + sum);
-            if (sum > 0) {
-                mesh[w.getPosition().getX()][w.getPosition().getY()] = 1;
-                //System.out.println("Sticked @ " + w.getPosition());
-                walkers.clear();
-                break;
-            }
-        }
-    }
 
     private void calculateStickingProbabilityKernel() {
         for (Walker w : walkers) {
             final int[][] subArray = getSubArray(w.getPosition());
             final int sum = subArrayMultSum(subArray, configuration.getKernel());
-            //System.out.println("sum = " + sum);
-            //System.out.println("sum = " + sum);
 
             boolean itSticks = sum*sum >=
                     ThreadLocalRandom.current().nextInt(1, configuration.getStickingProbability()*configuration.getStickingProbability());
             if (itSticks) {
                 mesh[w.getPosition().getX()][w.getPosition().getY()] = 1;
-                //System.out.println("Sticked @ " + w.getPosition());
                 walkers.clear();
                 break;
             }
@@ -148,28 +108,13 @@ public class DlaSimulation {
         return outArray;
     }
 
-    private void calculateStickingProbability() {
-        for (Walker w : walkers) {
-            boolean itSticks = arraySum8Neighbours(mesh, w.getPosition())*arraySum8Neighbours(mesh, w.getPosition()) >=
-                    ThreadLocalRandom.current().nextInt(1, configuration.getStickingProbability()*configuration.getStickingProbability());
-            if (itSticks) {
-                mesh[w.getPosition().getX()][w.getPosition().getY()] = 1;
-                //System.out.println("Sticked @ " + w.getPosition());
-                walkers.clear();
-                break;
-            }
-        }
-    }
-
-
     private void moveWalkers() {
         for (Walker w : walkers) {
             w.moveRnd(configuration.getMoveLength());
-            if (w.getPosition().getY() < (front - 10) || w.getPosition().getY() > front) {
-                w.respawn();
-                //System.out.println("respawned");
+            if (w.getPosition().getY() < (substrate.getValue(w.getPosition().getX()) - 10) ||
+                    w.getPosition().getY() >= substrate.getValue(w.getPosition().getX())) {
+                w.respawn(substrate);
             }
-            //System.out.println("w.getPosition() = " + w.getPosition());
         }
     }
 
@@ -195,23 +140,11 @@ public class DlaSimulation {
                 int[][] kernel = {
                         {0, 0, 0, 0, 0},
                         {0, 0, 0, 1, 0},
-                        {0, 0, 0, 5, 3},
+                        {0, 0, 0, 2, 1},
                         {0, 0, 0, 1, 0},
                         {0, 0, 0, 0, 0}
-                };
-                /*
-                int[][] kernel = {{0, 0, 0, 0, 0},
-                                  {0, 0, 0, 0, 0},
-                                  {0, 0, 0, 0, 0},
-                                  {0, 1, 1, 1, 0},
-                                  {1, 1, 1, 1, 1}};
+                }; 
 
-                int[][] kernel = {{0, 0, 0, 0, 0},
-                                  {0, 0, 0, 0, 0},
-                                  {0, 0, 0, 0, 0},
-                                  {0, 1, 5, 1, 0},
-                                  {0, 0, 1, 0, 0}};
-                 */
                 configuration = new Configuration("test");
                 configuration.setMeshSize(100);
                 configuration.setMeshResolution(10);
@@ -221,9 +154,19 @@ public class DlaSimulation {
                 configuration.setMoveLength(1);
                 configuration.setGrowthRatio(10); // Value: 0-100
                 configuration.setSpawnOffset(5);
-                configuration.setStickingProbability(9);
+                configuration.setStickingProbability(5);
                 configuration.setExposure(2000);
                 configuration.setKernel(kernel);
+                //configuration.substratePoints.add(new Position(0, 70));
+                //configuration.substratePoints.add(new Position(50, 100));
+                //configuration.substratePoints.add(new Position(100, 70));
+
+                configuration.substratePoints.add(new Position(0, 90));
+                configuration.substratePoints.add(new Position(100, 90));
+
+                //configuration.substratePoints.add(new Position(0, 90));
+                //configuration.substratePoints.add(new Position(100, 90));
+
                 break;
             }
 
