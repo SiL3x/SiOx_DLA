@@ -32,7 +32,7 @@ public class DisplaySites extends JFrame {
             Ellipse2D.Double circle1 = new Ellipse2D.Double(0, 0, 5, 5);
             graph2.draw(circle1);
 
-            graph2.setPaint(Color.GRAY);
+            graph2.setPaint(Color.WHITE);
 
             for (int x = 0; x < array.length; x++) {
                 for (int y = 0; y < array.length; y++) {

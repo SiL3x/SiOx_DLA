@@ -28,7 +28,8 @@ public class DlaSimulation {
 
     public DlaSimulation() {
         walkers = new ArrayList<>();
-        loadConfiguration("layer_1");
+        //loadConfiguration("layer_1");
+        loadConfiguration("test");
         createMesh();
         substrate = new Substrate(configuration.getMeshSize());
         substrate.createSubstrateFromPoints(configuration.substratePoints);
@@ -52,7 +53,7 @@ public class DlaSimulation {
             moveGrowthFront();
 
             if(j==1e6) run = false;
-            if (front >= 40) break;
+            if (front >= 50) break;
         }
 
         meshSave = arrayAdd(meshSave, mesh.clone());
@@ -63,13 +64,25 @@ public class DlaSimulation {
 
     private void placeSeed(int seedNumber) {
         int border = configuration.getKernel().length/2 +1;
+        List<Integer> seeds = new ArrayList<Integer>();
 
         for (int k = 0; k < seedNumber; k++) {
-            int x = ThreadLocalRandom.current().nextInt(border, configuration.getMeshSize() - border);
-            mesh[x][substrate.getValue(x) - 1] = 1;
-            System.out.println("Seed placed @ (" + x + ", " + (substrate.getValue(x) - 1) + ")");
+            Walker w = new Walker(configuration);
+            boolean inMotion = true;
+            while (inMotion) {
+                int walkX = w.getPosition().getX();
+                int walkY = w.getPosition().getY();
+                 if (walkY == (substrate.getValue(walkX) - 1)) {
+                     mesh[walkX][walkY] = 1;
+                     System.out.println("Seed positioned @ (" + walkX + ", " + walkY + ")");
+                     inMotion = false;
+                 }
+                 if (walkY < (substrate.getValue(walkX) - 20) || walkY >= substrate.getValue(walkX)) {
+                     w.respawn(substrate);
+                 }
+                 w.moveRnd(1);
+            }
         }
-
     }
 
     private void moveGrowthFrontByExposure() {
@@ -88,7 +101,6 @@ public class DlaSimulation {
             System.out.println("front = " + front);
         }
     }
-
 
     private void calculateStickingProbabilityKernel() {
         for (Walker w : walkers) {
