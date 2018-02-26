@@ -2,6 +2,7 @@ package main.configuration;
 
 import main.models.Position;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Configuration {
@@ -21,9 +22,11 @@ public class Configuration {
     private int stickingProbability;
     private int exposure;
     private int[][] kernel;
+    public List<Position> substratePoints;
 
     public Configuration(String configName) {
         this.configName = configName;
+        substratePoints = new ArrayList<>();
     }
 
     public void setMeshSize(int i) {

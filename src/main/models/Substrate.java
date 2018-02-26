@@ -13,23 +13,20 @@ public class Substrate {
 
     public Substrate(int meshSize) {
         this.meshSize = meshSize;
+        this.front = meshSize - 1;
         values = new int[meshSize];
 
-    }
-
-    public int[] getSubstrate() {
-        return values;
     }
 
     public void createSubstrateFromPoints(List<Position> points) {
         final int size = points.size();
         double slope;
 
-        if ( points.get(size - 1).getX() != meshSize ) {
+        if (points.get(size - 1).getX() != meshSize ) {
             System.out.println("ERROR: X value of the last point must match the mesh size!");
             return;
         }
-        if ( points.get(0).getX() != 0) {
+        if (points.get(0).getX() != 0) {
             System.out.println("ERROR: X value of the first point must be 0!");
             return;
         }
@@ -49,41 +46,61 @@ public class Substrate {
     }
 
     private void setHighestPoint() {
-        highestPoint = 0;
+        highestPoint = meshSize;
         for (int value : values) {
-            if (value > highestPoint) highestPoint = value;
+            if (value < highestPoint) highestPoint = value;
         }
+        System.out.println("highestPoint = " + highestPoint);
     }
 
-    public void getFront(int[][] mesh, int growthRatio) {
+    public int getFront(int[][] mesh, int growthRatio) {
 
-        for (int y = front; y >= highestPoint; y--) {
+        int frontTmp = front;
+
+        for (int y = (meshSize - highestPoint); y < front ; y++) {
+
             int sum = 0;
-            for (int x = 0; x < mesh.length; x++) {
-                sum += mesh[x][values[x]];
+
+            for (int x = 0; x < meshSize; x++) {
+                sum += mesh[x][values[x] + y - meshSize];
             }
+
+            if (sum > 0) {
+                System.out.println("sum = " + sum + "   y = " + y);
+            }
+
             if (sum >= (meshSize * growthRatio / 100D)) {
+                System.out.println("sum = " + sum + " y = " + y + "  -> break! -> frontTmp : " + (frontTmp - y));
                 front = y;
-                break;
+                //System.out.println("front new = " + front);
+                moveFrontBy(frontTmp - y + 1);
+                System.out.println("substrate = " + this);
+                setHighestPoint();
+                return  front - 1;
             }
         }
+        return  front;
     }
 
     public void moveFrontBy(int lines) {
-        if (highestPoint + lines >= meshSize) {
+        if (highestPoint - lines >= meshSize) {
             System.out.println("Mesh Boundary reached");
             return;
         }
 
-        front += lines;
+        System.out.println("moved front = " + front);
 
         for (int i = 0; i < values.length; i++) {
-            values[i] += lines;
+            values[i] -= lines;
         }
     }
 
     public int getValue(int x) {
         return values[x];
+    }
+
+    public void setFront(int front) {
+        this.front = front;
     }
 
     @Override
@@ -92,14 +109,40 @@ public class Substrate {
     }
 
     public static void main(String[] args) {
-        Substrate substrate = new Substrate(20);
+        int[][] mesh = {
+                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        };
+
+        System.out.println("mesh.length = " + mesh.length);
+
+        Substrate substrate = new Substrate(10);
         List<Position> positions = new ArrayList<>();
-        positions.add(new Position(0, 0));
-        positions.add(new Position(10, 5));
-        positions.add(new Position(20, 2));
+        positions.add(new Position(0, 10));
+        //positions.add(new Position(10, 15));
+        positions.add(new Position(10, 10));
+        substrate.setHighestPoint();
+
         substrate.createSubstrateFromPoints(positions);
         System.out.println(substrate);
-        substrate.moveFrontBy(2);
+        substrate.getFront(mesh, 15);
+        //substrate.moveFrontBy(2);
         System.out.println(substrate);
+        substrate.getFront(mesh, 15);
+        System.out.println(substrate);
+    }
+
+
+    public int getHighestPoint() {
+        return highestPoint;
     }
 }
