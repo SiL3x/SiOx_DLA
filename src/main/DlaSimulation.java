@@ -2,6 +2,7 @@ package main;
 
 import main.configuration.Configuration;
 import main.graphics.DisplaySites;
+import main.models.BondPosition;
 import main.models.Position;
 import main.models.Substrate;
 import main.models.Walker;
@@ -25,12 +26,14 @@ public class DlaSimulation {
     private int front;
     private int i;
     private Substrate substrate;
+    private List<BondPosition> bondPositions;
 
     public DlaSimulation() {
         walkers = new ArrayList<>();
         //loadConfiguration("layer_1");
         loadConfiguration("layer_1");
         createMesh();
+        calculateBondPosition();
         substrate = new Substrate(configuration.getMeshSize());
         substrate.createSubstrateFromPoints(configuration.substratePoints);
         placeSeed(configuration.getSeedNumber());
@@ -60,6 +63,20 @@ public class DlaSimulation {
         meshSave = arrayAdd(meshSave, substrate.getMeshWithSubstrate());
 
         DisplaySites displaySites = new DisplaySites(meshSave);
+    }
+
+    private void calculateBondPosition() {
+        bondPositions = new ArrayList<>();
+        int[][] kernel = configuration.getKernel();
+        int center  = kernel.length / 2;
+
+        for (int x = 0; x < kernel.length; x++) {
+            for (int y = 0; y < kernel.length; y++) {
+                if (kernel[x][y] != 0) {
+                    bondPositions.add(new BondPosition(x - center, y - center, kernel[x][y]));
+                }
+            }
+        }
     }
 
     private void placeSeed(int seedNumber) {
@@ -119,7 +136,33 @@ public class DlaSimulation {
             }
         }
     }
+/*
+    private void calculateStickingTiltedKernel() {
+        for (Walker w : walkers) {
 
+            if (w.getPosition().getY() >= (substrate.getValue(w.getPosition().getX()) - configuration.getSurfaceStickDistance())) {
+
+
+
+                int halfDiag = (int) (Math.ceil(configuration.getKernel().length) * 1.41 / 2);
+                for (int x = w.getPosition().getX() - halfDiag; x < w.getPosition().getX() + halfDiag; x++) {
+                    for (int y = w.getPosition().getY() - halfDiag; y < w.getPosition().getY() + halfDiag; y++) {
+
+
+                    }
+
+                }
+
+                boolean itSticks = sum*sum >=  ThreadLocalRandom.current().nextInt(1, configuration.getStickingProbability()*configuration.getStickingProbability());
+                if (itSticks) {
+                    mesh[w.getPosition().getX()][w.getPosition().getY()] = 1;
+                    walkers.clear();
+                    break;
+                }
+            }
+        }
+    }
+*/
     private int[][] getSubArray(Position position) {
         int size = configuration.getKernel().length;
         int px = position.getX();
