@@ -24,6 +24,7 @@ public class Configuration {
     private int[][] kernel;
     public List<Position> substratePoints;
     private int seedNumber;
+    private int surfaceStickDistance;
 
     public Configuration(String configName) {
         this.configName = configName;
@@ -123,5 +124,13 @@ public class Configuration {
 
     public int getSeedNumber() {
         return seedNumber;
+    }
+
+    public int getSurfaceStickDistance() {
+        return surfaceStickDistance;
+    }
+
+    public void setSurfaceStickDistance(int surfaceStickDistance) {
+        this.surfaceStickDistance = surfaceStickDistance;
     }
 }
