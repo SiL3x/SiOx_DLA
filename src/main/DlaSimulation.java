@@ -29,7 +29,7 @@ public class DlaSimulation {
     public DlaSimulation() {
         walkers = new ArrayList<>();
         //loadConfiguration("layer_1");
-        loadConfiguration("test");
+        loadConfiguration("layer_1");
         createMesh();
         substrate = new Substrate(configuration.getMeshSize());
         substrate.createSubstrateFromPoints(configuration.substratePoints);
@@ -52,7 +52,7 @@ public class DlaSimulation {
             calculateStickingProbabilityKernel();
             moveGrowthFront();
 
-            if(j==1e6) run = false;
+            if(j==2e6) run = false;
             if (front >= 50) break;
         }
 
@@ -104,15 +104,18 @@ public class DlaSimulation {
 
     private void calculateStickingProbabilityKernel() {
         for (Walker w : walkers) {
-            final int[][] subArray = getSubArray(w.getPosition());
-            final int sum = subArrayMultSum(subArray, configuration.getKernel());
 
-            boolean itSticks = sum*sum >=
-                    ThreadLocalRandom.current().nextInt(1, configuration.getStickingProbability()*configuration.getStickingProbability());
-            if (itSticks) {
-                mesh[w.getPosition().getX()][w.getPosition().getY()] = 1;
-                walkers.clear();
-                break;
+            if (w.getPosition().getY() >= (substrate.getValue(w.getPosition().getX()) - configuration.getSurfaceStickDistance())) {
+                final int[][] subArray = getSubArray(w.getPosition());
+                final int sum = subArrayMultSum(subArray, configuration.getKernel());
+
+                boolean itSticks = sum*sum >=
+                        ThreadLocalRandom.current().nextInt(1, configuration.getStickingProbability()*configuration.getStickingProbability());
+                if (itSticks) {
+                    mesh[w.getPosition().getX()][w.getPosition().getY()] = 1;
+                    walkers.clear();
+                    break;
+                }
             }
         }
     }
@@ -212,9 +215,9 @@ public class DlaSimulation {
                 configuration.setWalkerStart(new Position(50, 70));
                 configuration.setStickingDistance(3);
                 configuration.setMoveLength(1);
-                configuration.setGrowthRatio(40); // Value: 0-100
+                configuration.setGrowthRatio(20); // Value: 0-100
                 configuration.setSpawnOffset(5);
-                configuration.setStickingProbability(4);
+                configuration.setStickingProbability(7);
                 configuration.setExposure(2000);
                 configuration.setKernel(kernel);
                 configuration.substratePoints.add(new Position(0, 80));
@@ -223,6 +226,7 @@ public class DlaSimulation {
                 configuration.substratePoints.add(new Position(65, 92));
                 configuration.substratePoints.add(new Position(83, 85));
                 configuration.substratePoints.add(new Position(100, 89));
+                configuration.setSurfaceStickDistance(2);
 
                 break;
             }
