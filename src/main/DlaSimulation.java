@@ -136,12 +136,13 @@ public class DlaSimulation {
             }
         }
     }
-/*
+
     private void calculateStickingTiltedKernel() {
+        // TODO: finish the tilted Kernel sticking
+        /*
         for (Walker w : walkers) {
 
             if (w.getPosition().getY() >= (substrate.getValue(w.getPosition().getX()) - configuration.getSurfaceStickDistance())) {
-
 
 
                 int halfDiag = (int) (Math.ceil(configuration.getKernel().length) * 1.41 / 2);
@@ -161,8 +162,9 @@ public class DlaSimulation {
                 }
             }
         }
+        */
     }
-*/
+
     private int[][] getSubArray(Position position) {
         int size = configuration.getKernel().length;
         int px = position.getX();

@@ -24,7 +24,7 @@ public class BondPosition {
     public void tilt(final double turnAngle) {
         // turn angle in radians
         xTilt = r * Math.sin(angle + turnAngle);
-        yTilt = r * Math.cos(angle + turnAngle);
+        yTilt = -r * Math.cos(angle + turnAngle);
     }
 
     public double getX() {
@@ -33,5 +33,9 @@ public class BondPosition {
 
     public double getY() {
         return yTilt;
+    }
+
+    public double getAngle() {
+        return angle;
     }
 }
