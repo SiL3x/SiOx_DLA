@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static main.utils.ArrayUtils.*;
+import static main.utils.MathUtils.distance;
 
 public class DlaSimulation {
 
@@ -30,10 +31,10 @@ public class DlaSimulation {
 
     public DlaSimulation() {
         walkers = new ArrayList<>();
-        //loadConfiguration("layer_1");
-        loadConfiguration("layer_1");
+        //loadConfiguration("test");
+        loadConfiguration("layer_2");
         createMesh();
-        calculateBondPosition();
+        bondPositions = calculateBondPosition(configuration.getKernel());
         substrate = new Substrate(configuration.getMeshSize());
         substrate.createSubstrateFromPoints(configuration.substratePoints);
         placeSeed(configuration.getSeedNumber());
@@ -52,7 +53,7 @@ public class DlaSimulation {
             j++;
 
             moveWalkers();
-            calculateStickingProbabilityKernel();
+            calculateStickingTiltedKernel();
             moveGrowthFront();
 
             if(j==2e6) run = false;
@@ -65,18 +66,18 @@ public class DlaSimulation {
         DisplaySites displaySites = new DisplaySites(meshSave);
     }
 
-    private void calculateBondPosition() {
-        bondPositions = new ArrayList<>();
-        int[][] kernel = configuration.getKernel();
+    private List<BondPosition> calculateBondPosition(int[][] kernel) {
+        List<BondPosition> positions = new ArrayList<>();
         int center  = kernel.length / 2;
 
         for (int x = 0; x < kernel.length; x++) {
             for (int y = 0; y < kernel.length; y++) {
                 if (kernel[x][y] != 0) {
-                    bondPositions.add(new BondPosition(x - center, y - center, kernel[x][y]));
+                    positions.add(new BondPosition(x - center, center - y, kernel[x][y]));
                 }
             }
         }
+        return positions;
     }
 
     private void placeSeed(int seedNumber) {
@@ -89,15 +90,17 @@ public class DlaSimulation {
             while (inMotion) {
                 int walkX = w.getPosition().getX();
                 int walkY = w.getPosition().getY();
-                 if (walkY == (substrate.getValue(walkX) - 1)) {
+
+                if (walkY == (substrate.getValue(walkX) - 1)) {
                      mesh[walkX][walkY] = 1;
                      System.out.println("Seed positioned @ (" + walkX + ", " + walkY + ")");
                      inMotion = false;
-                 }
-                 if (walkY < (substrate.getValue(walkX) - 20) || walkY >= substrate.getValue(walkX)) {
+                }
+
+                if (walkY < (substrate.getValue(walkX) - 20) || walkY >= substrate.getValue(walkX)) {
                      w.respawn(substrate);
-                 }
-                 w.moveRnd(1);
+                }
+                w.moveRnd(1);
             }
         }
     }
@@ -138,20 +141,23 @@ public class DlaSimulation {
     }
 
     private void calculateStickingTiltedKernel() {
-        // TODO: finish the tilted Kernel sticking
-        /*
+        // TODO: check for high angles
         for (Walker w : walkers) {
 
             if (w.getPosition().getY() >= (substrate.getValue(w.getPosition().getX()) - configuration.getSurfaceStickDistance())) {
-
-
                 int halfDiag = (int) (Math.ceil(configuration.getKernel().length) * 1.41 / 2);
-                for (int x = w.getPosition().getX() - halfDiag; x < w.getPosition().getX() + halfDiag; x++) {
-                    for (int y = w.getPosition().getY() - halfDiag; y < w.getPosition().getY() + halfDiag; y++) {
+                double sum = 0;
+                double angle = substrate.getSubstrateNormal(w.getPosition().getX());
 
-
+                for (BondPosition bP : bondPositions) {
+                    bP.tilt(-angle);
+                    for (int x = w.getPosition().getX() - halfDiag; x < w.getPosition().getX() + halfDiag; x++) {
+                        for (int y = w.getPosition().getY() - halfDiag; y < w.getPosition().getY() + halfDiag; y++) {
+                            if (distance(x, y, (w.getPosition().getX() + bP.getX()), (w.getPosition().getY() - bP.getY())) < 0.5){
+                                sum += bP.getValue() * mesh[x][y];
+                            }
+                        }
                     }
-
                 }
 
                 boolean itSticks = sum*sum >=  ThreadLocalRandom.current().nextInt(1, configuration.getStickingProbability()*configuration.getStickingProbability());
@@ -162,7 +168,6 @@ public class DlaSimulation {
                 }
             }
         }
-        */
     }
 
     private int[][] getSubArray(Position position) {
@@ -211,7 +216,7 @@ public class DlaSimulation {
                 int[][] kernel = {
                         {0, 0, 0, 0, 0},
                         {0, 0, 0, 1, 0},
-                        {0, 0, 0, 2, 1},
+                        {0, 0, 0, 8, 4},
                         {0, 0, 0, 1, 0},
                         {0, 0, 0, 0, 0}
                 }; 
@@ -220,7 +225,7 @@ public class DlaSimulation {
                 configuration.setMeshSize(100);
                 configuration.setMeshResolution(10);
                 //configuration.setSeedPosition(Arrays.asList(new Position(35, 90), new Position(70, 90)));
-                configuration.setSeedNumber(6);
+                configuration.setSeedNumber(50);
                 configuration.setWalkerStart(new Position(50, 70));
                 configuration.setStickingDistance(3);
                 configuration.setMoveLength(1);
@@ -248,7 +253,7 @@ public class DlaSimulation {
                 int[][] kernel = {
                         {0, 0, 0, 0, 0},
                         {0, 0, 0, 1, 0},
-                        {0, 0, 0, 2, 1},
+                        {0, 0, 0, 6, 3},
                         {0, 0, 0, 1, 0},
                         {0, 0, 0, 0, 0}
                 };
@@ -256,7 +261,7 @@ public class DlaSimulation {
                 configuration = new Configuration("first real try");
                 configuration.setMeshSize(100);
                 configuration.setMeshResolution(10);
-                configuration.setSeedNumber(20);
+                configuration.setSeedNumber(15);
                 configuration.setWalkerStart(new Position(50, 70));
                 configuration.setStickingDistance(3);
                 configuration.setMoveLength(1);
@@ -275,6 +280,38 @@ public class DlaSimulation {
 
                 break;
             }
+
+            case "layer_2" : {
+                System.out.println("simulate one layer of SiOx on AZO");
+
+                int[][] kernel = {
+                        {0, 0, 0, 0, 0},
+                        {0, 0, 0, 1, 0},
+                        {0, 0, 0, 6, 2},
+                        {0, 0, 0, 1, 0},
+                        {0, 0, 0, 0, 0}
+                };
+
+                configuration = new Configuration("oxide in valleys");
+                configuration.setMeshSize(100);
+                configuration.setMeshResolution(10);
+                configuration.setSeedNumber(15);
+                configuration.setWalkerStart(new Position(50, 70));
+                configuration.setStickingDistance(3);
+                configuration.setMoveLength(1);
+                configuration.setGrowthRatio(15); // Value: 0-100
+                configuration.setSpawnOffset(5);
+                configuration.setStickingProbability(9);
+                configuration.setExposure(2000);
+                configuration.setKernel(kernel);
+                configuration.substratePoints.add(new Position(0, 75));
+                configuration.substratePoints.add(new Position(50, 92));
+                configuration.substratePoints.add(new Position(100, 75));
+                configuration.setSurfaceStickDistance(2);
+
+                break;
+            }
+
 
             case "big_one" : {
                 System.out.println("this is a big one");

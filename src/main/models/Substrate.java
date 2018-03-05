@@ -2,6 +2,7 @@ package main.models;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class Substrate {
@@ -13,6 +14,7 @@ public class Substrate {
     int spread;
     int min;
     int max;
+    double[] slopes;
 
     public Substrate(int meshSize) {
         this.meshSize = meshSize;
@@ -23,6 +25,7 @@ public class Substrate {
 
     public void createSubstrateFromPoints(List<Position> points) {
         final int size = points.size();
+        slopes = new double[points.get(points.size() - 1).getX()];
         double slope;
 
         if (points.get(size - 1).getX() != meshSize ) {
@@ -36,7 +39,10 @@ public class Substrate {
 
         for (int i = 1; i < size; i++) {
             slope = 1D * (points.get(i - 1).getY() - points.get(i).getY()) / (points.get(i - 1).getX() - points.get(i).getX());
-            System.out.println("slope = " + slope);
+
+            for (int x = points.get(i - 1).getX(); x < points.get(i).getX(); x++) {
+                slopes[x] = slope;
+            }
 
             int k = 0;
             for (int j = points.get(i - 1).getX(); j < points.get(i).getX(); j++) {
@@ -87,6 +93,11 @@ public class Substrate {
             if (values[x] > max) max = values[x];
         }
         return max - min;
+    }
+
+    public double getSubstrateNormal(int x) {
+        double normal = Math.atan(slopes[x]); // in radians
+        return normal;
     }
 
     public int getHighestPoint() {

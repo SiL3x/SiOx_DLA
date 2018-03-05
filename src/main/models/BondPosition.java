@@ -18,7 +18,6 @@ public class BondPosition {
         yTilt = y;
         r = Math.sqrt(x * x + y * y);
         angle = Math.asin(x / r); // In radians - only valid for below the center
-        System.out.println("x = " + x + "  y = " + y + "  angle = " + angle);
     }
 
     public void tilt(final double turnAngle) {
@@ -37,5 +36,14 @@ public class BondPosition {
 
     public double getAngle() {
         return angle;
+    }
+
+    public int getValue() {
+        return bondValue;
+    }
+
+    @Override
+    public String toString() {
+        return ("Value = " + bondValue + "  @ (" + x + ", " + y + ")");
     }
 }
