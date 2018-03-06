@@ -57,7 +57,7 @@ public class DlaSimulation {
             moveGrowthFront();
 
             if(j==2e6) run = false;
-            if (front >= 50) break;
+            if (front >= 70) break;
         }
 
         meshSave = arrayAdd(meshSave, mesh.clone());
@@ -83,9 +83,11 @@ public class DlaSimulation {
     private void placeSeed(int seedNumber) {
         int border = configuration.getKernel().length/2 +1;
         List<Integer> seeds = new ArrayList<Integer>();
+        int spread = configuration.getMeshSize() / seedNumber;
 
         for (int k = 0; k < seedNumber; k++) {
-            Walker w = new Walker(configuration);
+            //Walker w = new Walker(configuration, configuration.getWalkerStart().getY(), spread * (k + 1) );
+            Walker w = new Walker(configuration, substrate.getValue(spread * (k + 1)) - 2, spread * (k + 1) );
             boolean inMotion = true;
             while (inMotion) {
                 int walkX = w.getPosition().getX();
@@ -287,7 +289,7 @@ public class DlaSimulation {
                 int[][] kernel = {
                         {0, 0, 0, 0, 0},
                         {0, 0, 0, 1, 0},
-                        {0, 0, 0, 6, 2},
+                        {0, 0, 0, 8, 3},
                         {0, 0, 0, 1, 0},
                         {0, 0, 0, 0, 0}
                 };
@@ -295,18 +297,18 @@ public class DlaSimulation {
                 configuration = new Configuration("oxide in valleys");
                 configuration.setMeshSize(100);
                 configuration.setMeshResolution(10);
-                configuration.setSeedNumber(15);
+                configuration.setSeedNumber(40);
                 configuration.setWalkerStart(new Position(50, 70));
                 configuration.setStickingDistance(3);
                 configuration.setMoveLength(1);
-                configuration.setGrowthRatio(15); // Value: 0-100
+                configuration.setGrowthRatio(17); // Value: 0-100
                 configuration.setSpawnOffset(5);
-                configuration.setStickingProbability(9);
+                configuration.setStickingProbability(15);
                 configuration.setExposure(2000);
                 configuration.setKernel(kernel);
-                configuration.substratePoints.add(new Position(0, 75));
+                configuration.substratePoints.add(new Position(0, 65));
                 configuration.substratePoints.add(new Position(50, 92));
-                configuration.substratePoints.add(new Position(100, 75));
+                configuration.substratePoints.add(new Position(100, 65));
                 configuration.setSurfaceStickDistance(2);
 
                 break;
