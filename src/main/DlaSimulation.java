@@ -303,7 +303,7 @@ public class DlaSimulation {
                 configuration.setMoveLength(1);
                 configuration.setGrowthRatio(17); // Value: 0-100
                 configuration.setSpawnOffset(5);
-                configuration.setStickingProbability(15);
+                configuration.setStickingProbability(20);
                 configuration.setExposure(2000);
                 configuration.setKernel(kernel);
                 configuration.substratePoints.add(new Position(0, 65));
