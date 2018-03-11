@@ -25,6 +25,13 @@ public class Walker {
         this.position = new Position(randomX, spawnY);
     }
 
+    public Walker(Configuration configuration, int front, int x) {
+        this.configuration = configuration;
+        this.spawnY = front - configuration.getSpawnOffset();
+        this.border = configuration.getKernel().length/2 +1;
+        this.position = new Position(x, spawnY);
+    }
+
     public void respawn(Substrate substrate) {
         int randomX = ThreadLocalRandom.current().nextInt(border, configuration.getMeshSize() - border);
         spawnY = substrate.getValue(randomX) - 10;

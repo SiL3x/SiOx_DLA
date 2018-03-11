@@ -6,6 +6,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
 public class DisplaySites extends JFrame {
+
     private int[][] array;
 
     public DisplaySites(int[][] array) {
@@ -43,7 +44,6 @@ public class DisplaySites extends JFrame {
                     }
                 }
             }
-
         }
 
         private Shape cirle(int i) {
